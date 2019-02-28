@@ -3,71 +3,79 @@ import BookmarksContext from "../BookmarksContext";
 import config from "../config";
 
 class EditBookmark extends Component {
-    constructor(props){
-        super(props);
-        this.state = {
-            error: null,
-            id: '',
-            title: '',
-            url: '',
-            description: '',
-            rating: 1 
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      id: '',
+      title: '',
+      url: '',
+      description: '',
+      rating: 1,
+    }
+  }
+
+  static contextType = BookmarksContext;
+
+  handleChangeTitle = e => { this.setState({title: e.target.value}) }
+  handleChangeUrl = e => { this.setState({url: e.target.value}) }
+  handleChangeDescription = e => { this.setState({description: e.target.value}) }
+  handleChangeRating = e => { this.setState({rating: e.target.value}) }
+  handleChangeCancel = () => { this.props.history.push('/') }
+
+  componentDidMount() {
+    const { bookmarkId } = this.props.match.params;
+
+    fetch(`${config.API_ENDPOINT}/${bookmarkId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${config.API_KEY}`
+      }
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(data => {
+        console.log(data);
+        this.setState({
+          id: data.id,
+          title: data.title,
+          url: data.url,
+          description: data.description,
+          rating: data.rating
+        })
+      })
+      .catch(error => {
+        this.setState({ error })
+      })
+  }
+
+  handleSubmit = e => {
+    e.preventDefault();
+    const { bookmarkId } = this.props.match.params;
+    const { id, title, url, description, rating } = this.state;
+    const newBookmark = { title, url, description, rating };
+
+    fetch(config.API_ENDPOINT + `/${bookmarkId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(newBookmark),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.API_KEY}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          return new Error();
         }
-    }
-    
-    static contextType = BookmarksContext;
+      })
+      .then(json => {
+        this.context.editBookmark({...newBookmark, id: id});
+      })
+      .catch(e => e);
+  }
 
-    componentDidMount(){
-        const {bookmarkId} = this.props.match.params;
-        fetch(config.API_ENDPOINT + `/${bookmarkId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${config.API_KEY}`
-            }
-        })
-            .then(res => {
-                if(!res.ok){
-                    return res.json().then(error => Promise.reject(error))
-                }
-            })
-            .then(data => {
-                this.setState({
-                    id: data.id,
-                    title: data.title,
-                    url: data.url,
-                    description: data.description,
-                    rating: data.rating
-                })
-            })
-            .catch(error => {
-                this.setState({error})
-            })
-    }
-
-    handleSubmit = e => {
-        e.preventDefault();
-        const {bookmarkId} = this.props.match.params;
-        const {id, title, url, description, rating} = this.state;
-        const newBookmark = {id, title, url, description, rating};
-        fetch(config.API_ENDPOINT + `/${bookmarkId}`, {
-            method: 'PATCH',
-            body: JSON.stringify(newBookmark),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.API_KEY}`
-            }
-        })
-            .then(res => {
-                if(!res.ok){
-                    return res.json().then(error => Promise.reject(error))
-                }
-            })
-            .then(() => {
-                this.context.editBookmark(newBookmark)
-            })
-    }
-  
-    render() {
+  render() {
     return (
       <section className="EditBookmark">
         <h2>Edit bookmark</h2>

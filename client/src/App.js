@@ -28,11 +28,18 @@ class App extends Component {
   }
 
   editBookmark = bookmark => {
-    this.setState({
+    console.log(bookmark);
+    let find = this.state.bookmarks.findIndex(b => b.id === bookmark.id);
+    let bookmarks = this.state.bookmarks;
+    bookmarks[find] = bookmark;
+
+    this.setState({bookmarks});
+
+    /*this.setState({
       bookmarks: this.state.bookmarks.map(b =>
         (b.id !== bookmark.id) ? b : bookmark
       )
-    })
+    })*/
   }
 
   componentDidMount() {
