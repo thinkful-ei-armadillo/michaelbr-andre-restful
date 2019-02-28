@@ -64,6 +64,18 @@ describe('Testing bookmarks endpoints...', () => {
       .expect(204, next);
   });
 
+  it('UPDATE /bookmarks should allow partial updates', (next) => {
+    const title = {
+      title: '2MDN'
+    };
+
+    supertest(app)
+      .patch('/api/bookmarks/3')
+      .set('Authorization', `Bearer ${process.env.API_KEY}`)
+      .send(title)
+      .expect(204, next);
+  });
+
   it('UPDATE /bookmarks should update the database table', (next) => {
     const id = 1;
     const bookmark = {
