@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import BookmarksContext from "../BookmarksContext";
 import config from "../config";
+import { withRouter } from "react-router-dom";
 
 class EditBookmark extends Component {
   constructor(props) {
@@ -71,6 +72,7 @@ class EditBookmark extends Component {
       })
       .then(json => {
         this.context.editBookmark({...newBookmark, id: id});
+        this.props.history.push('/');
       })
       .catch(e => e);
   }
@@ -148,4 +150,4 @@ class EditBookmark extends Component {
   }
 }
 
-export default EditBookmark;
+export default withRouter(EditBookmark);
